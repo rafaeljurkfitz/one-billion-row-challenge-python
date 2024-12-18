@@ -2,9 +2,9 @@
 
 ## Introdução
 
-O objetivo deste projeto é demonstrar como processar eficientemente um arquivo de dados massivo contendo 1 bilhão de linhas (~14GB), especificamente para calcular estatísticas (Incluindo agregação e ordenação que são operações pesadas) utilizando Python. 
+O objetivo deste projeto é demonstrar como processar eficientemente um arquivo de dados massivo contendo 1 bilhão de linhas (~14GB), especificamente para calcular estatísticas (Incluindo agregação e ordenação que são operações pesadas) utilizando Python.
 
-Este desafio foi inspirado no [The One Billion Row Challenge](https://github.com/gunnarmorling/1brc), originalmente proposto para Java.
+O desafio foi inspirado no [The One Billion Row Challenge](https://github.com/gunnarmorling/1brc), originalmente proposto para Java. Este projeto foi inspirado pelo projeto [One-Billion-Row-Challenge-Python](https://github.com/lvgalvao/One-Billion-Row-Challenge-Python), onde eu tomei a liberdade de testar tambem outros arquivos de tamanhos menores que 1 bilhão de linhas.
 
 O arquivo de dados consiste em medições de temperatura de várias estações meteorológicas. Cada registro segue o formato `<string: nome da estação>;<double: medição>`, com a temperatura sendo apresentada com precisão de uma casa decimal.
 
@@ -51,105 +51,126 @@ O desafio é desenvolver um programa Python capaz de ler esse arquivo e calcular
 
 ## Dependências
 
+## Dependências Inicias
+
+* [Docker](https://www.docker.com/) - não é obrigatório, a execução pode ser local.
+* [UV](https://docs.astral.sh/uv/)
+
+### Instalando o UV
+
+1. Instale o pipx e pare de usar pip. (Você irá me agradecer depois.)
+
+    ```bash
+    pip install pipx
+    ```
+
+2. Instale o UV (Bye bye Poetry)
+
+    ```bash
+    pipx install uv
+    ```
+
+## Dependências de projeto
+
 Para executar os scripts deste projeto, você precisará das seguintes bibliotecas:
 
-* Polars: `0.20.3`
-* DuckDB: `0.10.0`
-* Dask[complete]: `^2024.2.0`
+* Polars: `1.17.1`
+* DuckDB: `1.1.3`
+* Dask[complete]: `^2024.12.0`
+* Modin[dask]: `0.32.0`
+* dask-expr: `1.1.20`
+* Pandas: `2.2.3`
+* python-dotenv: `1.0.1`
+* tqdm: `4.67.1`
 
-## Resultados
+1. Apenas execute esse comando e o UV irá instalar as dependecias de maneira rapida.
 
-Os testes foram realizados em um laptop equipado com um processador M1 da Apple e 8GB de RAM. As implementações utilizaram abordagens puramente Python, Pandas, Dask, Polars e DuckDB. Os resultados de tempo de execução para processar o arquivo de 1 bilhão de linhas são apresentados abaixo:
+```bash
+    uv sync
+```
 
-| Implementação | Tempo |
-| --- | --- |
-| Bash + awk | 25 minutos |
-| Python | 20 minutos |
-| Python + Pandas | 263 sec |
-| Python + Dask | 155.62 sec  |
-| Python + Polars | 33.86 sec |
-| Python + Duckdb | 14.98 sec |
+## Observações iniciais
 
-Obrigado por [Koen Vossen](https://github.com/koenvo) pela implementação em Polars e [Arthur Julião](https://github.com/ArthurJ) pela implementação em Python e Bash 
+* As configurações inicias do meu computador:
+  * Intel Core I7-8700 - 12 nucleos - 6 fisicos.
+  * 16 GB RAM
+  * HD SATA 1TB
+  * __SSD 512 GB__
+
+* __Docker__ - Eu utilizei ele porque acreditava que o Win11 estava interferindo nos benchmarks, devido às grandes divergências em comparação com os testes realizados por outros programadores. Eu achei que poderia ser algo relacionado com escalonamento de processos, ou má performance do python em multiprocessamento.
+
+A verdade é que o Docker utilizado nos testes, em comparação com os testes locais, acabou interferindo negativamente nos resultados. No entanto, o desempenho foi melhor do que o esperado, pois percebi no final dos testes que o WSL2 estava instalado no meu SSD, e não no HD SATA (onde os testes locais estavam sendo executados e onde os meus projetos estavam armazenados). Infelizmente, só percebi isso ao final.
+
+Ainda insistindo na  nessa situação de usar Docker, criei um volume no Docker e movi os arquivos necessários para a execução dos benchmarks para lá. Em seguida, construí uma imagem contendo os testes e suas dependências e executei como containers temporários. Com isso, obtive os resultados abaixo.
+
+## Resultados do benchmark entre as ferramentas
+
+### 10 mil linhas
+
+```mermaid
+xychart-beta
+    title "Comparação de Desempenho - 10k Linhas"
+    x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
+    y-axis "Tempo (segundos)" 0 --> 1
+    bar [0.11, 0.06, 0.94, 0.15, 0.12]
+```
+
+### 100 mil linhas
+
+```mermaid
+xychart-beta
+    title "Comparação de Desempenho - 100k Linhas"
+    x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
+    y-axis "Tempo (segundos)" 0 --> 10
+    bar [0.19, 0.04, 0.86, 0.21, 0.41]
+```
+
+### 1 milhão de linhas
+
+```mermaid
+xychart-beta
+    title "Comparação de Desempenho - 1M Linhas"
+    x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
+    y-axis "Tempo (segundos)" 0 --> 10
+    bar [0.17, 0.17, 1.31, 2.93, 3.38]
+```
+
+### 10 milhões de linhas
+
+```mermaid
+xychart-beta
+    title "Comparação de Desempenho - 10M Linhas"
+    x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
+    y-axis "Tempo (segundos)" 0 --> 50
+    bar [0.64, 0.60, 6.83, 6.44, 35.11]
+```
+
+### 100 milhões de linhas
+
+```mermaid
+xychart-beta
+    title "Comparação de Desempenho - 100M Linhas"
+    x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
+    y-axis "Tempo (segundos)" 0 --> 100
+    bar [5.02, 5.57, 41.65, 91.24, 366.20]
+```
+
+### 1 bilhão de linhas
+
+```mermaid
+xychart-beta
+    title "Comparação de Desempenho - 1B Linhas"
+    x-axis ["Polars", "DuckDB", "Dask", "Pandas"]
+    y-axis "Tempo (segundos)" 0 --> 600
+    bar [62.23, 49.94, 276.11, 582.22]
+```
+
+* O script apenas com python não aguentou até o final.
 
 ## Conclusão
 
-Este desafio destacou claramente a eficácia de diversas bibliotecas Python na manipulação de grandes volumes de dados. Métodos tradicionais como Bash (25 minutos), Python puro (20 minutos) e até mesmo o Pandas (5 minutos) demandaram uma série de táticas para implementar o processamento em "lotes", enquanto bibliotecas como Dask, Polars e DuckDB provaram ser excepcionalmente eficazes, requerendo menos linhas de código devido à sua capacidade inerente de distribuir os dados em "lotes em streaming" de maneira mais eficiente. O DuckDB se sobressaiu, alcançando o menor tempo de execução graças à sua estratégia de execução e processamento de dados.
+* O `DuckDB` foi o grande vencedor como esperando, acredito que refazendo todos os testes de forma local eu consiguirei resultados melhores, mas nada que mude a ordem dos vencedores.
 
-Esses resultados enfatizam a importância de selecionar a ferramenta adequada para análise de dados em larga escala, demonstrando que Python, com as bibliotecas certas, é uma escolha poderosa para enfrentar desafios de big data.
+* Usar __Pandas com chunks__ é burrice, use o __Polars__.
 
-Duckdb vence tambem com 1 milhao de linhas, realmente é o melhor
-
-## Como Executar
-
-Para executar este projeto e reproduzir os resultados:
-
-1. Clone esse repositório
-2. Definir a versao do Python usando o `pyenv local 3.12.1`
-2. `poetry env use 3.12.1`, `poetry install --no-root` e `poetry lock --no-update`
-3. Execute o comando `python src/create_measurements.py` para gerar o arquivo de teste
-4. Tenha paciência e vá fazer um café, vai demorar uns 10 minutos para gerar o arquivo
-5. Certifique-se de instalar as versões especificadas das bibliotecas Dask, Polars e DuckDB
-6. Execute os scripts `python src/using_python.py`, `python src/using_pandas.py`, `python src/using_dask.py`, `python src/using_polars.py` e `python src/using_duckdb.py` através de um terminal ou ambiente de desenvolvimento que suporte Python.
-
-Este projeto destaca a versatilidade do ecossistema Python para tarefas de processamento de dados, oferecendo valiosas lições sobre escolha de ferramentas para análises em grande escala.
-
-## Bonus
-
-Para rodar o script Bash descrito, você precisa seguir alguns passos simples. Primeiro, assegure-se de que você tenha um ambiente Unix-like, como Linux ou macOS, que suporta scripts Bash nativamente. Além disso, verifique se as ferramentas utilizadas no script (`wc`, `head`, `pv`, `awk`, e `sort`) estão instaladas em seu sistema. A maioria dessas ferramentas vem pré-instalada em sistemas Unix-like, mas `pv` (Pipe Viewer) pode precisar ser instalado manualmente.
-
-### Instalando o Pipe Viewer (pv)
-
-Se você não tem o `pv` instalado, pode facilmente instalá-lo usando o gerenciador de pacotes do seu sistema. Por exemplo:
-
-* No Ubuntu/Debian:
-    
-    ```bash
-    sudo apt-get update
-    sudo apt-get install pv
-    ```
-    
-* No macOS (usando [Homebrew](https://brew.sh/)):
-    
-    ```bash
-    brew install pv
-    ```
-    
-### Preparando o Script
-
-1. Dê permissão de execução para o arquivo script. Abra um terminal e execute:
-    
-    ```bash
-    chmod +x process_measurements.sh
-    ```
-
-2. Rode o script. Abra um terminal e execute:
-   
-   ```bash
-   ./src/using_bash_and_awk.sh 1000
-   ```
-
-Neste exemplo, apenas as primeiras 1000 linhas serão processadas.
-
-Ao executar o script, você verá a barra de progresso (se pv estiver instalado corretamente) e, eventualmente, a saída esperada no terminal ou em um arquivo de saída, se você decidir modificar o script para direcionar a saída.
-
-## Próximos passos
-
-Esse projeto faz parte da *Jornada de Dados*
-Nossa missão é fornecer o melhor ensino em engenharia de dados
-
-Se você quer:
-
-- Aprender sobre Duckdb e engenharia de dados
-- Construir uma base sólida em Python e SQL
-- Criar ou melhorar seu portfólio de dados
-- Criar ou aumentar o seu networking na área
-- Mudar ou dar o próximo passo em sua carreira
-
-A Jornada de Dados é o seu lugar
-
-[![Imagem](https://github.com/lvgalvao/data-engineering-roadmap/raw/main/pics/jornada.png)](https://www.jornadadedados2024.com.br/workshops)
-
-Para entrar na lista de espera clique no botao
-
-[![Imagem](https://raw.githubusercontent.com/lvgalvao/data-engineering-roadmap/main/pics/lista_de_espera.png)](https://forms.gle/hJMtRDP3MPBUGvwS7?orbt_src=orbt-vst-1RWyYmpICDu9gPknLgaD)
+* Apesar de ser algo já conhecido da comunidade e nem era o fócuo dos testes, o Python não trabalha bem com multiprocessamento e varias threads, isso foi visivel no meu gerenciador de tarefas do Win11.
