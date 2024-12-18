@@ -115,6 +115,14 @@ xychart-beta
     bar [0.11, 0.06, 0.94, 0.15, 0.12]
 ```
 
+| Implementação  | Tempo  |
+| -------------- | ------ |
+| Polars         | 0.11 sec |
+| DuckDB         | 0.06 sec |
+| Dask           | 0.94 sec |
+| Pandas         | 0.15 sec |
+| Python         | 0.12 sec |
+
 ### 100 mil linhas
 
 ```mermaid
@@ -124,6 +132,14 @@ xychart-beta
     y-axis "Tempo (segundos)" 0 --> 10
     bar [0.19, 0.04, 0.86, 0.21, 0.41]
 ```
+
+| Implementação  | Tempo  |
+| -------------- | ------ |
+| Polars         | 0.19 sec |
+| DuckDB         | 0.04 sec |
+| Dask           | 0.86 sec |
+| Pandas         | 0.21 sec |
+| Python         | 0.41 sec |
 
 ### 1 milhão de linhas
 
@@ -135,6 +151,14 @@ xychart-beta
     bar [0.17, 0.17, 1.31, 2.93, 3.38]
 ```
 
+| Implementação  | Tempo  |
+| -------------- | ------ |
+| Polars         | 0.17 sec |
+| DuckDB         | 0.17 sec |
+| Dask           | 1.31 sec |
+| Pandas         | 2.93 sec |
+| Python         | 3.38 sec |
+
 ### 10 milhões de linhas
 
 ```mermaid
@@ -145,15 +169,31 @@ xychart-beta
     bar [0.64, 0.60, 6.83, 6.44, 35.11]
 ```
 
+| Implementação  | Tempo  |
+| -------------- | ------ |
+| Polars         | 0.64 sec |
+| DuckDB         | 0.60 sec |
+| Dask           | 6.83 sec |
+| Pandas         | 6.44 sec |
+| Python         | 35.11 sec |
+
 ### 100 milhões de linhas
 
 ```mermaid
 xychart-beta
     title "Comparação de Desempenho - 100M Linhas"
     x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
-    y-axis "Tempo (segundos)" 0 --> 100
+    y-axis "Tempo (segundos)" 0 --> 400
     bar [5.02, 5.57, 41.65, 91.24, 366.20]
 ```
+
+| Implementação  | Tempo  |
+| -------------- | ------ |
+| Polars         | 5.02 sec |
+| DuckDB         | 5.57 sec |
+| Dask           | 41.65 sec |
+| Pandas         | 91.24 sec |
+| Python         | 366.20 sec |
 
 ### 1 bilhão de linhas
 
@@ -165,12 +205,29 @@ xychart-beta
     bar [62.23, 49.94, 276.11, 582.22]
 ```
 
-* O script apenas com python não aguentou até o final.
+* _O script apenas com python não aguentou até o final. E o meu computador reniciou kkkk_
+
+| Implementação  | Tempo  |
+| -------------- | ------ |
+| Polars         | 62.23 sec |
+| DuckDB         | 49.94 sec |
+| Dask           | 276.11 sec |
+| Pandas         | 582.22 sec |
+| Python         | (explodiu) |
 
 ## Conclusão
 
 * O `DuckDB` foi o grande vencedor como esperando, acredito que refazendo todos os testes de forma local eu consiguirei resultados melhores, mas nada que mude a ordem dos vencedores.
 
-* Usar __Pandas com chunks__ é burrice, use o __Polars__.
+* Usar __Pandas com chunks__ é burrice, use o __Polars__ ou qualquer uma das outras ferramentas. Principalmente para __Big Data__. Usar Pandas ou Python Puro que demandam uma série de gambiarras e inventar a roda novamente para implementar o processamento em "lotes"(chunks), __é perda de TEMPO__.
 
 * Apesar de ser algo já conhecido da comunidade e nem era o fócuo dos testes, o Python não trabalha bem com multiprocessamento e varias threads, isso foi visivel no meu gerenciador de tarefas do Win11.
+
+* Esses resultados enfatizam mais uma vez a importância de selecionar a ferramenta adequada para análise de dados em larga escala, demonstrando que Python, com as bibliotecas certas, é uma escolha poderosa para enfrentar desafios de big data.
+
+Dask, Polars e DuckDB provaram ser excepcionalmente eficazes, requerendo menos linhas de código devido à sua capacidade inerente de distribuir os dados em "lotes em streaming" de maneira mais eficiente.
+
+## Próximos passos
+
+* RODAR NOVAMENTE O PROJETO COM SDD BOM, JUNTO COM O SPARK.
+  
