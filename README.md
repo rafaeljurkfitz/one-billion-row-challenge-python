@@ -129,7 +129,7 @@ xychart-beta
 xychart-beta
     title "Comparação de Desempenho - 100k Linhas"
     x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
-    y-axis "Tempo (segundos)" 0 --> 10
+    y-axis "Tempo (segundos)" 0 --> 1
     bar [0.19, 0.04, 0.86, 0.21, 0.41]
 ```
 
@@ -147,7 +147,7 @@ xychart-beta
 xychart-beta
     title "Comparação de Desempenho - 1M Linhas"
     x-axis ["Polars", "DuckDB", "Dask", "Pandas", "Python"]
-    y-axis "Tempo (segundos)" 0 --> 10
+    y-axis "Tempo (segundos)" 0 --> 5
     bar [0.17, 0.17, 1.31, 2.93, 3.38]
 ```
 
